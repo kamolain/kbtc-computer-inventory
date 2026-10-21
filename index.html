@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ทะเบียนคอมพิวเตอร์</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --border: #c9c9c9;
+      --muted: #666;
+      --background: #f5f5f5;
+      --white: #fff;
+      --primary: #1f5f8b;
+      --danger: #a12622;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: #222;
+      font-family: Arial, "Tahoma", sans-serif;
+      line-height: 1.5;
+    }
+
+    .page {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .header-actions { display: flex; gap: 8px; }
+    .account-bar { align-items: center; display: flex; gap: 10px; margin-bottom: 18px; }
+    .account-email { color: var(--muted); font-size: 14px; }
+    .auth-page { margin: 80px auto; max-width: 440px; }
+    .auth-page h1 { margin-bottom: 8px; }
+    .auth-form { display: grid; gap: 14px; margin-top: 20px; }
+    .auth-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .auth-divider { border-top: 1px solid #ddd; margin: 4px 0; padding-top: 14px; }
+    .auth-error { color: var(--danger); margin: 0; }
+    h1, h2 { margin: 0; }
+    h1 { font-size: 26px; }
+    h2 { font-size: 20px; }
+    .subtitle { color: var(--muted); margin: 4px 0 0; }
+
+    button {
+      border: 1px solid #777;
+      border-radius: 3px;
+      background: var(--white);
+      color: #222;
+      cursor: pointer;
+      font: inherit;
+      padding: 8px 14px;
+    }
+
+    button:hover { background: #eee; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #9dcced; outline-offset: 1px; }
+    .primary-button { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .primary-button:hover { background: #17496b; }
+    .danger-button { color: var(--danger); }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px;
+    }
+
+    .panel-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .count { color: var(--muted); font-size: 14px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; table-layout: fixed; }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      overflow-wrap: anywhere;
+      padding: 11px 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th { background: #f0f0f0; font-weight: bold; white-space: nowrap; }
+    th:nth-child(1), td:nth-child(1) { width: 10%; }
+    th:nth-child(2), td:nth-child(2) { width: 14%; }
+    th:nth-child(3), td:nth-child(3) { width: 13%; }
+    th:nth-child(4), td:nth-child(4) { width: 13%; }
+    th:nth-child(5), td:nth-child(5) { width: 25%; }
+    th:nth-child(6), td:nth-child(6) { width: 13%; }
+    th:nth-child(7), td:nth-child(7) { width: 12%; }
+    tbody tr:hover { background: #fafafa; }
+    .empty-row td { color: var(--muted); padding: 28px 10px; text-align: center; }
+    .computer-image { background: #eee; border: 1px solid #ccc; height: 56px; object-fit: cover; width: 76px; }
+    .no-image { color: var(--muted); font-size: 13px; }
+    .specs { max-width: 260px; white-space: pre-line; word-break: break-word; }
+
+    dialog {
+      border: 1px solid #888;
+      border-radius: 4px;
+      padding: 0;
+      width: min(620px, calc(100% - 32px));
+    }
+
+    dialog::backdrop { background: rgba(0, 0, 0, .35); }
+    .modal-header, .modal-footer { padding: 16px 20px; }
+    .modal-header { border-bottom: 1px solid #ddd; }
+    .modal-footer { border-top: 1px solid #ddd; display: flex; justify-content: flex-end; gap: 8px; }
+    .modal-body { padding: 20px; }
+    .form-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+    .full-width { grid-column: 1 / -1; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input, textarea {
+      border: 1px solid #999;
+      border-radius: 3px;
+      font: inherit;
+      padding: 8px;
+      width: 100%;
+    }
+    textarea { min-height: 86px; resize: vertical; }
+    .required { color: var(--danger); }
+    .image-preview { color: var(--muted); font-size: 13px; margin-top: 8px; max-height: 130px; max-width: 180px; }
+    .error-message { color: var(--danger); margin: 0 0 12px; }
+    #print-area { display: none; }
+
+    @media print {
+      @page { margin: 16mm; }
+      body { background: #fff; }
+      body > *:not(#print-area) { display: none !important; }
+      #print-area {
+        display: block;
+        color: #000;
+        font-family: Arial, "Tahoma", sans-serif;
+      }
+      .print-title { border-bottom: 2px solid #222; margin-bottom: 20px; padding-bottom: 10px; }
+      .print-title h1 { font-size: 22px; margin: 0; }
+      .print-date { color: #555; font-size: 12px; margin-top: 4px; }
+      .print-record { border: 1px solid #999; break-inside: avoid; margin-bottom: 18px; padding: 14px; }
+      .print-record h2 { border-bottom: 1px solid #ccc; font-size: 17px; margin: 0 0 12px; padding-bottom: 7px; }
+      .print-details { display: grid; gap: 7px 20px; grid-template-columns: 1fr 1fr; }
+      .print-detail { overflow-wrap: anywhere; }
+      .print-label { font-weight: bold; }
+      .print-specs { white-space: pre-line; }
+      .print-image { display: block; height: 120px; margin: 0 0 12px; object-fit: contain; width: 160px; }
+      .print-no-image { color: #555; font-size: 13px; margin-bottom: 12px; }
+      #print-area.all-records .print-title { margin-bottom: 10px; padding-bottom: 6px; }
+      #print-area.all-records .print-title h1 { font-size: 17px; }
+      #print-area.all-records .print-date { font-size: 10px; margin-top: 2px; }
+      #print-area.all-records .print-record {
+        border: 0;
+        border-bottom: 1px solid #bbb;
+        margin: 0;
+        padding: 4px 0;
+        white-space: nowrap;
+      }
+      #print-area.all-records .print-record h2 {
+        border: 0;
+        display: inline;
+        font-size: 10px;
+        font-weight: normal;
+        margin: 0 8px 0 0;
+        padding: 0;
+      }
+      #print-area.all-records .print-details {
+        display: inline;
+        font-size: 9px;
+      }
+      #print-area.all-records .print-detail { display: inline; margin-right: 9px; }
+      #print-area.all-records .print-label { font-size: 9px; }
+      #print-area.single-record .print-title h1 { font-size: 30px; }
+      #print-area.single-record .print-date { font-size: 15px; }
+      #print-area.single-record .print-record { padding: 24px; }
+      #print-area.single-record .print-record h2 { font-size: 24px; margin-bottom: 20px; padding-bottom: 10px; }
+      #print-area.single-record .print-details { gap: 14px; grid-template-columns: 1fr; }
+      #print-area.single-record .print-detail { font-size: 21px; line-height: 1.6; }
+      #print-area.single-record .print-label { font-size: 21px; }
+      #print-area.single-record .print-image { height: 280px; margin-bottom: 22px; width: 380px; }
+      #print-area.single-record .print-no-image { font-size: 17px; margin-bottom: 22px; }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 20px, 1200px); padding-top: 20px; }
+      header { align-items: stretch; flex-direction: column; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full-width { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <section class="page panel auth-page" id="auth-page">
+    <h1>ทะเบียนคอมพิวเตอร์</h1>
+    <p class="subtitle">กรุณาเข้าสู่ระบบเพื่อใช้งาน</p>
+    <form class="auth-form" id="auth-form">
+      <div>
+        <label for="auth-email">อีเมล</label>
+        <input id="auth-email" type="email" autocomplete="email" required>
+      </div>
+      <div>
+        <label for="auth-password">รหัสผ่าน</label>
+        <input id="auth-password" type="password" autocomplete="current-password" required>
+      </div>
+      <p class="auth-error" id="auth-error" hidden></p>
+      <div class="auth-actions">
+        <button class="primary-button" type="submit">เข้าสู่ระบบ</button>
+        <button id="create-account" type="button">สร้างบัญชี</button>
+      </div>
+      <div class="auth-divider">
+        <button id="google-login" type="button">เข้าสู่ระบบด้วย Google</button>
+      </div>
+    </form>
+  </section>
+
+  <main class="page" id="app-page" hidden>
+    <div class="account-bar">
+      <span class="account-email" id="account-email"></span>
+      <button id="logout" type="button">ออกจากระบบ</button>
+    </div>
+    <header>
+      <!-- <div>
+        <h1>ทะเบียนคอมพิวเตอร์</h1>
+        <p class="subtitle">จัดเก็บข้อมูลอุปกรณ์คอมพิวเตอร์ในหน่วยงาน</p>
+      </div> -->
+      <div class="header-actions">
+        <button id="print-all" type="button">พิมพ์ทั้งหมด</button>
+        <button class="primary-button" id="open-modal" type="button">+ เพิ่มคอมพิวเตอร์</button>
+      </div>
+    </header>
+
+    <section class="panel" aria-labelledby="inventory-heading">
+      <div class="panel-heading">
+        <h2 id="inventory-heading">รายการคอมพิวเตอร์</h2>
+        <span class="count" id="item-count">0 รายการ</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>รูปภาพ</th>
+              <th>เลข</th>
+              <th>เจ้าของ</th>
+              <th>ผู้ดูแล</th>
+              <th>Specs</th>
+              <th>สถานที่</th>
+              <th>การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body">
+            <tr class="empty-row" id="empty-row">
+              <td colspan="7">ยังไม่มีข้อมูล</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="computer-modal" aria-labelledby="modal-title">
+    <form id="computer-form">
+      <div class="modal-header">
+        <h2 id="modal-title">เพิ่มคอมพิวเตอร์</h2>
+      </div>
+      <div class="modal-body">
+        <p class="error-message" id="form-error" hidden></p>
+        <div class="form-grid">
+          <div>
+            <label for="registration">เลข <span class="required">*</span></label>
+            <input id="registration" name="registration" required>
+          </div>
+          <div>
+            <label for="owner">เจ้าของ <span class="required">*</span></label>
+            <input id="owner" name="owner" required>
+          </div>
+          <div>
+            <label for="caretaker">ผู้ดูแล <span class="required">*</span></label>
+            <input id="caretaker" name="caretaker" required>
+          </div>
+          <div>
+            <label for="location">สถานที่ <span class="required">*</span></label>
+            <input id="location" name="location" required>
+          </div>
+          <div class="full-width">
+            <label for="specs">Specs <span class="required">*</span></label>
+            <textarea id="specs" name="specs" placeholder="เช่น Core i5, RAM 16 GB, SSD 512 GB" required></textarea>
+          </div>
+          <div class="full-width">
+            <label for="image">รูปภาพ</label>
+            <input id="image" name="image" type="file" accept="image/*">
+            <img class="image-preview" id="image-preview" alt="ตัวอย่างรูปภาพ" hidden>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancel-modal" type="button">ยกเลิก</button>
+        <button class="primary-button" type="submit">บันทึกข้อมูล</button>
+      </div>
+    </form>
+  </dialog>
+
+  <section id="print-area" aria-hidden="true"></section>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+    import {
+      createUserWithEmailAndPassword,
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      signInWithPopup,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+    import {
+      addDoc,
+      collection,
+      deleteDoc,
+      doc,
+      getFirestore,
+      onSnapshot,
+      serverTimestamp,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+    (function () {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDB8lGyctHj5Lhsl3CdN17XdQFQB7PC7uE",
+        authDomain: "kbtc-computer-inventory.firebaseapp.com",
+        projectId: "kbtc-computer-inventory",
+        storageBucket: "kbtc-computer-inventory.firebasestorage.app",
+        messagingSenderId: "468909648476",
+        appId: "1:468909648476:web:fcddf1351aee041c4b9499",
+        measurementId: "G-E8B3KB0CWR"
+      };
+      const editorEmails = [
+        "kamolain@gmail.com"
+      ];
+      const firebaseApp = initializeApp(firebaseConfig);
+      const auth = getAuth(firebaseApp);
+      const database = getFirestore(firebaseApp);
+      const recordsCollection = collection(database, "computers");
+      const authPage = document.getElementById("auth-page");
+      const appPage = document.getElementById("app-page");
+      const authForm = document.getElementById("auth-form");
+      const authError = document.getElementById("auth-error");
+      const accountEmail = document.getElementById("account-email");
+      let unsubscribeRecords = null;
+
+      function showAuthError(message) {
+        authError.textContent = message;
+        authError.hidden = false;
+      }
+
+      function friendlyAuthError(error) {
+        const messages = {
+          "auth/email-already-in-use": "อีเมลนี้ถูกใช้งานแล้ว",
+          "auth/invalid-credential": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+          "auth/invalid-email": "รูปแบบอีเมลไม่ถูกต้อง",
+          "auth/popup-closed-by-user": "หน้าต่าง Google ถูกปิดก่อนเข้าสู่ระบบ",
+          "auth/weak-password": "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"
+        };
+        return messages[error.code] || "ไม่สามารถเข้าสู่ระบบได้: " + error.message;
+      }
+
+      function canEdit(user) {
+        return Boolean(user.email) && editorEmails.includes(user.email.toLowerCase());
+      }
+
+      const modal = document.getElementById("computer-modal");
+      const form = document.getElementById("computer-form");
+      const body = document.getElementById("inventory-body");
+      const emptyRow = document.getElementById("empty-row");
+      const count = document.getElementById("item-count");
+      const imageInput = document.getElementById("image");
+      const imagePreview = document.getElementById("image-preview");
+      const errorMessage = document.getElementById("form-error");
+      const modalTitle = document.getElementById("modal-title");
+      const submitButton = form.querySelector('button[type="submit"]');
+      let selectedImage = "";
+      let itemCount = 0;
+      let editingRow = null;
+
+      function updateCount() {
+        count.textContent = itemCount + " รายการ";
+        emptyRow.hidden = itemCount !== 0;
+      }
+
+      function addCell(row, value, className) {
+        const cell = row.insertCell();
+        cell.textContent = value;
+        if (className) cell.className = className;
+        return cell;
+      }
+
+      function updateRow(row, data) {
+        row.record = data;
+        const imageCell = row.cells[0];
+        imageCell.replaceChildren();
+        if (data.image) {
+          const image = document.createElement("img");
+          image.className = "computer-image";
+          image.alt = "รูปภาพ " + data.registration;
+          image.src = data.image;
+          imageCell.appendChild(image);
+        } else {
+          const noImage = document.createElement("span");
+          noImage.className = "no-image";
+          noImage.textContent = "ไม่มีรูปภาพ";
+          imageCell.appendChild(noImage);
+        }
+        row.cells[1].textContent = data.registration;
+        row.cells[2].textContent = data.owner;
+        row.cells[3].textContent = data.caretaker;
+        row.cells[4].textContent = data.specs;
+        row.cells[5].textContent = data.location;
+      }
+
+      function addComputer(data) {
+        const row = body.insertRow();
+        addCell(row, "");
+        addCell(row, data.registration);
+        addCell(row, data.owner);
+        addCell(row, data.caretaker);
+        addCell(row, data.specs, "specs");
+        addCell(row, data.location);
+        updateRow(row, data);
+        const actionCell = row.insertCell();
+        const printButton = document.createElement("button");
+        printButton.type = "button";
+        printButton.textContent = "พิมพ์";
+        printButton.addEventListener("click", function () {
+          printRecords([row.record]);
+        });
+        actionCell.appendChild(printButton);
+        if (canEdit(auth.currentUser)) {
+          const editButton = document.createElement("button");
+          editButton.type = "button";
+          editButton.textContent = "แก้ไข";
+          editButton.style.marginLeft = "6px";
+          editButton.addEventListener("click", function () {
+            editingRow = row;
+            modalTitle.textContent = "แก้ไขข้อมูลคอมพิวเตอร์";
+            submitButton.textContent = "บันทึกการแก้ไข";
+            errorMessage.hidden = true;
+            document.getElementById("registration").value = row.record.registration;
+            document.getElementById("owner").value = row.record.owner;
+            document.getElementById("caretaker").value = row.record.caretaker;
+            document.getElementById("specs").value = row.record.specs;
+            document.getElementById("location").value = row.record.location;
+            selectedImage = row.record.image;
+            imagePreview.src = selectedImage;
+            imagePreview.hidden = !selectedImage;
+            modal.showModal();
+            document.getElementById("registration").focus();
+          });
+          actionCell.appendChild(editButton);
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "danger-button";
+          deleteButton.type = "button";
+          deleteButton.textContent = "ลบ";
+          deleteButton.style.marginLeft = "6px";
+          deleteButton.addEventListener("click", async function () {
+            if (!window.confirm("ต้องการลบข้อมูลของ " + row.record.registration + " ใช่หรือไม่?")) return;
+            try {
+              await deleteDoc(doc(database, "computers", row.record.id));
+            } catch (error) {
+              window.alert("ลบข้อมูลไม่สำเร็จ: " + error.message);
+            }
+          });
+          actionCell.appendChild(deleteButton);
+        }
+        itemCount += 1;
+        updateCount();
+      }
+
+      function renderRecords(records) {
+        body.replaceChildren(emptyRow);
+        itemCount = 0;
+        records.forEach(addComputer);
+        updateCount();
+      }
+
+      function createPrintDetail(label, value, className) {
+        const detail = document.createElement("div");
+        detail.className = "print-detail";
+        const labelElement = document.createElement("span");
+        labelElement.className = "print-label";
+        labelElement.textContent = label + ": ";
+        detail.appendChild(labelElement);
+        const valueElement = document.createElement("span");
+        if (className) valueElement.className = className;
+        valueElement.textContent = value;
+        detail.appendChild(valueElement);
+        return detail;
+      }
+
+      function printRecords(records) {
+        if (!records.length) {
+          window.alert("ยังไม่มีข้อมูลสำหรับพิมพ์");
+          return;
+        }
+        const printArea = document.getElementById("print-area");
+        printArea.className = records.length === 1 ? "single-record" : "all-records";
+        printArea.replaceChildren();
+        const title = document.createElement("div");
+        title.className = "print-title";
+        const heading = document.createElement("h1");
+        heading.textContent = records.length === 1 ? "รายละเอียดคอมพิวเตอร์" : "ทะเบียนคอมพิวเตอร์ทั้งหมด";
+        title.appendChild(heading);
+        const date = document.createElement("div");
+        date.className = "print-date";
+        date.textContent = "พิมพ์เมื่อ " + new Date().toLocaleString("th-TH");
+        title.appendChild(date);
+        printArea.appendChild(title);
+
+        records.forEach(function (record, index) {
+          const article = document.createElement("article");
+          article.className = "print-record";
+          const recordHeading = document.createElement("h2");
+          recordHeading.textContent = records.length === 1
+            ? "เลข: " + record.registration
+            : (index + 1) + ". เลข: " + record.registration;
+          article.appendChild(recordHeading);
+          if (records.length === 1 && record.image) {
+            const image = document.createElement("img");
+            image.className = "print-image";
+            image.alt = "รูปภาพ " + record.registration;
+            image.src = record.image;
+            article.appendChild(image);
+          } else if (records.length === 1) {
+            const noImage = document.createElement("div");
+            noImage.className = "print-no-image";
+            noImage.textContent = "รูปภาพ: ไม่มีรูปภาพ";
+            article.appendChild(noImage);
+          }
+          const details = document.createElement("div");
+          details.className = "print-details";
+          details.appendChild(createPrintDetail("เจ้าของ", record.owner));
+          details.appendChild(createPrintDetail("ผู้ดูแล", record.caretaker));
+          details.appendChild(createPrintDetail("Specs", record.specs, "print-specs"));
+          details.appendChild(createPrintDetail("สถานที่", record.location));
+          article.appendChild(details);
+          printArea.appendChild(article);
+        });
+        window.print();
+      }
+
+      document.getElementById("open-modal").addEventListener("click", function () {
+        editingRow = null;
+        modalTitle.textContent = "เพิ่มคอมพิวเตอร์";
+        submitButton.textContent = "บันทึกข้อมูล";
+        form.reset();
+        selectedImage = "";
+        imagePreview.hidden = true;
+        errorMessage.hidden = true;
+        modal.showModal();
+        document.getElementById("registration").focus();
+      });
+
+      document.getElementById("cancel-modal").addEventListener("click", function () {
+        modal.close();
+        form.reset();
+        selectedImage = "";
+        imagePreview.hidden = true;
+        editingRow = null;
+        modalTitle.textContent = "เพิ่มคอมพิวเตอร์";
+        submitButton.textContent = "บันทึกข้อมูล";
+      });
+
+      imageInput.addEventListener("change", function () {
+        const file = imageInput.files[0];
+        if (!file) {
+          selectedImage = "";
+          imagePreview.hidden = true;
+          return;
+        }
+        const reader = new FileReader();
+        reader.addEventListener("load", function () {
+          selectedImage = reader.result;
+          imagePreview.src = selectedImage;
+          imagePreview.hidden = false;
+        });
+        reader.readAsDataURL(file);
+      });
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (!canEdit(auth.currentUser)) {
+          errorMessage.textContent = "บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล";
+          errorMessage.hidden = false;
+          return;
+        }
+        if (!form.reportValidity()) return;
+        const formData = new FormData(form);
+        const data = {
+          registration: formData.get("registration").trim(),
+          owner: formData.get("owner").trim(),
+          caretaker: formData.get("caretaker").trim(),
+          specs: formData.get("specs").trim(),
+          location: formData.get("location").trim(),
+          image: selectedImage || (editingRow ? editingRow.record.image : "")
+        };
+        const savedData = {
+          registration: data.registration,
+          owner: data.owner,
+          caretaker: data.caretaker,
+          specs: data.specs,
+          location: data.location
+        };
+        (async function () {
+          try {
+            if (editingRow) {
+              await updateDoc(doc(database, "computers", editingRow.record.id), savedData);
+            } else {
+              await addDoc(recordsCollection, {
+                ...savedData,
+                createdAt: serverTimestamp()
+              });
+            }
+            form.reset();
+            selectedImage = "";
+            imagePreview.hidden = true;
+            editingRow = null;
+            modalTitle.textContent = "เพิ่มคอมพิวเตอร์";
+            submitButton.textContent = "บันทึกข้อมูล";
+            modal.close();
+          } catch (error) {
+            errorMessage.textContent = "บันทึกข้อมูลไม่สำเร็จ: " + error.message;
+            errorMessage.hidden = false;
+          }
+        }());
+      });
+
+      document.getElementById("print-all").addEventListener("click", function () {
+        const records = Array.from(body.rows)
+          .filter(function (row) { return row.record; })
+          .map(function (row) { return row.record; });
+        printRecords(records);
+      });
+
+      updateCount();
+
+      authForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        authError.hidden = true;
+        try {
+          await signInWithEmailAndPassword(
+            auth,
+            document.getElementById("auth-email").value.trim(),
+            document.getElementById("auth-password").value
+          );
+        } catch (error) {
+          showAuthError(friendlyAuthError(error));
+        }
+      });
+
+      document.getElementById("create-account").addEventListener("click", async function () {
+        authError.hidden = true;
+        try {
+          await createUserWithEmailAndPassword(
+            auth,
+            document.getElementById("auth-email").value.trim(),
+            document.getElementById("auth-password").value
+          );
+        } catch (error) {
+          showAuthError(friendlyAuthError(error));
+        }
+      });
+
+      document.getElementById("google-login").addEventListener("click", async function () {
+        authError.hidden = true;
+        try {
+          await signInWithPopup(auth, new GoogleAuthProvider());
+        } catch (error) {
+          showAuthError(friendlyAuthError(error));
+        }
+      });
+
+      document.getElementById("logout").addEventListener("click", function () {
+        signOut(auth);
+      });
+
+      onAuthStateChanged(auth, function (user) {
+        if (unsubscribeRecords) {
+          unsubscribeRecords();
+          unsubscribeRecords = null;
+        }
+        if (!user) {
+          authPage.hidden = false;
+          appPage.hidden = true;
+          accountEmail.textContent = "";
+          return;
+        }
+        try {
+          const editor = canEdit(user);
+          authPage.hidden = true;
+          appPage.hidden = false;
+          accountEmail.textContent = user.email;
+          document.getElementById("open-modal").hidden = !editor;
+          unsubscribeRecords = onSnapshot(recordsCollection, function (snapshot) {
+            const records = snapshot.docs.map(function (recordDoc) {
+              return { id: recordDoc.id, ...recordDoc.data(), image: "" };
+            });
+            records.sort(function (first, second) {
+              const firstTime = first.createdAt && first.createdAt.toMillis ? first.createdAt.toMillis() : 0;
+              const secondTime = second.createdAt && second.createdAt.toMillis ? second.createdAt.toMillis() : 0;
+              return firstTime - secondTime;
+            });
+            renderRecords(records);
+          }, function (error) {
+            window.alert("โหลดข้อมูลไม่สำเร็จ: " + error.message);
+          });
+        } catch (error) {
+          showAuthError(error.message);
+        }
+      });
+    }());
+  </script>
+</body>
+</html>
