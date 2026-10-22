@@ -6,7 +6,8 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow create, update, delete: if request.auth != null
         && request.auth.token.email in [
-          "kamolain@gmail.com"
+          "kamolain@gmail.com",
+          "admin@kbtc.ac.th"
         ];
     }
   }
